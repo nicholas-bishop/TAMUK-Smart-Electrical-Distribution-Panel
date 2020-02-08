@@ -1,2 +1,2 @@
 # TAMUK-Smart-Panel
-This is our electrical engineering senior design project, which uses the arduino in conjunction with the raspberry pi.
+This is our electrical engineering senior design project, which uses the arduino in conjunction with the raspberry pi. All of the current, voltage, and power readings are handled by sensors connected to the arduino. The data is passed via the serial port to the pi. We are using Node-Red to display the data to a 7" LCD screen (that acts as our HMI) and any device that has browser support. 
