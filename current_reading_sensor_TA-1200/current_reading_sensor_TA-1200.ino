@@ -1,9 +1,14 @@
+// 
+// Author(s): Nicholas Bishop, Jose Martinez 
+// Last modified: 2/10/2020
+//
 
-// Code adapted from Henry's Bench - Nicholas Bishop
+// Sources/references
+// Code to read current is adapted from Henry's Bench
 // Henry's Bench TA-1200 AC Current Sensor Tutorial
 
 
-const byte NUM_INPUTS = 6; 
+const byte NUM_INPUTS = 12; 
 const byte pvi[NUM_INPUTS] = { A0, A1, A2, A3, A4, A5 };
 float current; 
 
@@ -23,6 +28,7 @@ float temp;
  void loop() 
  {
      populateArray(pvi, NUM_INPUTS);
+    
  }
 
 
