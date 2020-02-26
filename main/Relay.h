@@ -2,7 +2,8 @@
 
 class Relay {
   private: 
-    bool isOn; 
+    bool isOn;
+    
     
   public: 
     Relay::Relay(bool val) 

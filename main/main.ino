@@ -1,9 +1,10 @@
 
-unsigned int FLAG; 
 
+unsigned int FLAG; 
 
 void setup() {
   // little delay to get voltage (~20 ms) to charge cap. !!!
+  //delay(30);
   FLAG = 1;
 }
 
@@ -17,7 +18,7 @@ void loop() {
 
   // state 1 
   // normal operation for the main panel 
-        // turn on relays 2,3,4,5 (double check this)
+        // turn on relays 1,2,3,4,5 (double check this)
         // check voltage from ulitility
         // if voltage from ulit. is present 
             // turn off battery relay

@@ -39,6 +39,15 @@ float power2;
 float power3;
 float power4;
 
+// voltage delay variables
+boolean utilFlag = false; // flag for when utility power is off
+float utilVoltage;
+
+// for timing delay interrupt
+unsigned long time_now = 0;
+int period = 30000;
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -53,45 +62,116 @@ void setup() {
   pinMode(sensor2, INPUT);
   pinMode(sensor3, INPUT);
   pinMode(sensor4, INPUT);
+
+  // voltage delay upon startup
+  // while utility had no power
+  while (!utilFlag)
+  {
+    // get analog voltage reading
+    utilVoltage = initVoltReading();
+    // if reading > 2.0 volts
+    if (utilVoltage > 1.0)
+    {
+      // wait 1 second
+      delay(900);
+      // if reading still > 2.0 volts
+      utilVoltage = initVoltReading();
+      if (utilVoltage > 1.0)
+      {
+        utilFlag = true;
+      } // end inner if
+    } // end outer if
+  } // end while loop
  
 }
-void loop(){
- volts();
- Current();
+
+void loop()
+{
+  
+    // while utility power is lost
+    while (!utilFlag)
+    {
+        // get analog voltage reading
+        utilVoltage = initVoltReading(); // reusing same init voltage function
+        // if voltage is greater than 1 volt
+        if (utilVoltage > 1.0)
+        {
+            // wait conecutive 30 seconds for util to comeback
+            time_now = millis(); // get the time right now
+            // keep waiting until 30 seconds have passed with consecutive utility voltage
+            while (millis() < time_now + period)
+            {
+              // if voltage is seen (<1v) reset timer to 30 seconds
+              if (initVoltReading() < 1.0) 
+              {
+                  time_now = millis(); // grab the n
+              }
+              Current(); // ********* THIS WAS ADDED HERE FROM BOTTOM IF STATEMENT
+            }
+            // if AFTER 30 consecutive seconds, reading still greater than 1 volt
+            utilFlag = true;
+        }
+    }
+
+    // ORIGINAL function calls
+    // normal operation
+    if (utilFlag)
+    {
+      volts();
+      Current();
+    }
+  
 }
 
 
-void volts(void) {
-  float Volt;
+
+//**********************************************************************
+//   This function is just to get an initial utility voltage reading   *
+//   used in the setup()                                               *
+//**********************************************************************
+
+float initVoltReading()
+{
+    float initVoltage; // temp value
+    int vReading = analogRead(pvi);
+    initVoltage = (5./1023.)*vReading;
+    return initVoltage;
+}
+
+
+void volts(void) 
+{
+    float Volt;
   
-
-
-    {
     int value = analogRead ( pvi);
     Volt = (5./1023.)*value;
-  }
 
 
   //Serial.println(Volt);
   //Serial.print(",");
 
-  if (Volt <= 1.21) {
-
+  // utility power loss, now going to battery backup
+  if (Volt < 1.0)
+  {
     digitalWrite(utilityrelay, LOW);
     digitalWrite(batteryrelay, HIGH);
     digitalWrite(load2, HIGH);
     digitalWrite(load4, HIGH);
     digitalWrite(load3, LOW);
    // digitalWrite(load5, LOW);
+   utilFlag = false;
+   
   }
 
-  if (Volt >= 1.20) {
+  // utility power is back, return from battery
+  if (Volt >= 1.0) {
     digitalWrite(utilityrelay, HIGH);
     digitalWrite(batteryrelay, LOW);
     digitalWrite(load2, HIGH);
     digitalWrite(load3, HIGH);
     digitalWrite(load4, HIGH);
     //digitalWrite(load5, HIGH);
+    utilFlag = true;
 
   }
 }
@@ -253,7 +333,6 @@ float getVPP2()
 }
 
 float getVPP3()
-
 {
   float result3;
   int readValue3;
