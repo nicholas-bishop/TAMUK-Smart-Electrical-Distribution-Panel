@@ -52,6 +52,9 @@ float utilVoltage;
 unsigned long time_now = 0;
 int period = 30000;
 
+// for overcurrent stuff
+String strVar;
+
 
 
 void setup() {
@@ -96,11 +99,13 @@ void loop()
     // while utility power is lost
     while (!utilFlag)
     {
+        Current(); // !!!
         // get analog voltage reading
         utilVoltage = initVoltReading(); // reusing same init voltage function
         // if voltage is greater than 1 volt
         if (utilVoltage > 1.0)
         {
+            Current(); // !!!!!
             // wait conecutive 30 seconds for util to comeback
             time_now = millis(); // get the time right now
             // keep waiting until 30 seconds have passed with consecutive utility voltage
@@ -151,10 +156,6 @@ void volts(void)
     int value = analogRead ( pvi);
     Volt = (5./1023.)*value;
 
-
-  //Serial.println(Volt);
-  //Serial.print(",");
-
   // utility power loss, now going to battery backup
   if (Volt < 1.0)
   {
@@ -189,44 +190,62 @@ void Current(){
   nVPP4 = getVPP4();
  
 
+  // ***** Current from Relay 1  *****
   nCurrThruResistorPP = (nVPP / 200.0) * 1000.0;
   nCurrThruResistorRMS = nCurrThruResistorPP * 0.707;
   nCurrentThruWire = nCurrThruResistorRMS * 1;
   power = nCurrentThruWire * 120;
 
+  // ***** Current from Relay 2  *****
   nCurrThruResistorPP1 = (nVPP1 / 200.0) * 1000.0;
   nCurrThruResistorRMS1 = nCurrThruResistorPP1 * 0.707;
   nCurrentThruWire1 = nCurrThruResistorRMS1 * 1;
   power1 = nCurrentThruWire1 * 120;
 
+  // **** Current from Relay 3  *****
   nCurrThruResistorPP2 = (nVPP2 / 200.0) * 1000.0;
   nCurrThruResistorRMS2 = nCurrThruResistorPP2 * 0.707;
   nCurrentThruWire2 = nCurrThruResistorRMS2 * 1;
   power2 = nCurrentThruWire1 * 120;
 
+  // **** Current from Relay 4  *****
   nCurrThruResistorPP3 = (nVPP3 / 200.0) * 1000.0;
   nCurrThruResistorRMS3 = nCurrThruResistorPP3 * 0.707;
   nCurrentThruWire3 = nCurrThruResistorRMS3 * 1;
   power3 = nCurrentThruWire1 * 120;
 
+  // **** Current from Relay 5  *****
   nCurrThruResistorPP4 = (nVPP4 / 200.0) * 1000.0;
   nCurrThruResistorRMS4 = nCurrThruResistorPP4 * 0.707;
   nCurrentThruWire4 = nCurrThruResistorRMS4 * 1;
   power4 = nCurrentThruWire4 * 120;
 
 
+  //***************************************************
+  //   Over Current Case    - jose's implementation   *
+  //***************************************************
 
-  //Serial.print("Volts Peak : ");
-  //Serial.println(nVPP,3);
+  if (nCurrentThruWire2 > 0.6)
+  {
+    digitalWrite(load3, LOW);
+  }
 
+  /*
+  strVar = "";
+  if (Serial.available())
+  {
+    strVar += Serial.readString();
+  }
+  if(strVar == "2")
+  {
+    digitalWrite(load3, !digitalRead(load3));
+  }
+  */
 
-  // Serial.print("Current Through Resistor (Peak) : ");
-  //Serial.print(nCurrThruResistorPP,3);
-  //Serial.println(" mA Peak to Peak");
-
-  //Serial.print("Current Through Resistor (RMS) : ");
-  //Serial.print(nCurrThruResistorRMS,3);
-  // Serial.println(" mA RMS");
+  //***************************************************
+  //   End of Over Current Case                       *
+  //***************************************************
+  
 
   Serial.print(nCurrentThruWire);
   //Serial.print(" R1 ");
@@ -257,7 +276,6 @@ void Current(){
  
   Serial.print(power4);
   Serial.print(",");
-
 
   Serial.println();
 }
