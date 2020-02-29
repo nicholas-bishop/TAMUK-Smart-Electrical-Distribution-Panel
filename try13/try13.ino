@@ -135,6 +135,7 @@ void loop()
     Current();
   }
 
+  RESET_FROM_NODE();
 
 }
 
@@ -192,6 +193,25 @@ void volts(void)
   
 }
 
+void RESET_FROM_NODE()
+{
+    if (currFlag)
+    {
+      // send alert to Node Red
+      Serial.print(currFlag);
+      strVar = "";
+      if (Serial.available())
+      {
+        strVar = Serial.readString();
+      }
+      if(strVar)
+      {
+        digitalWrite(load3, HIGH);
+        currFlag = false;
+      }
+    }
+}
+
 
 
 void Current() {
@@ -240,6 +260,7 @@ void Current() {
   if (nCurrentThruWire2 > 0.6)
   {
     currFlag = true; // latch
+    /*
     strVar = "";
     if (Serial.available())
     {
@@ -250,6 +271,7 @@ void Current() {
       digitalWrite(load3, HIGH);
       currFlag = false;
     }
+    */
   }
 
   //***************************************************
