@@ -166,7 +166,6 @@ void volts(void)
     digitalWrite(load3, LOW);
    // digitalWrite(load5, LOW);
    utilFlag = false;
-   
   }
 
   // utility power is back, return from battery
@@ -178,7 +177,6 @@ void volts(void)
     digitalWrite(load4, HIGH);
     //digitalWrite(load5, HIGH);
     utilFlag = true;
-
   }
 }
 
