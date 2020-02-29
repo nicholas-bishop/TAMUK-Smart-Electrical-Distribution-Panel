@@ -1,3 +1,8 @@
+//  
+//  Description: code to control relay and monitor current transformers on arduino controller
+//  Authors: Jose Martinez, Nicholas Bishop
+//  
+
 #define utilityrelay 2
 #define batteryrelay 7
 #define load2 3
@@ -67,20 +72,20 @@ void setup() {
   // while utility had no power
   while (!utilFlag)
   {
-    // get analog voltage reading
-    utilVoltage = initVoltReading();
-    // if reading > 2.0 volts
-    if (utilVoltage > 1.0)
-    {
-      // wait 1 second
-      delay(900);
-      // if reading still > 2.0 volts
+      // get analog voltage reading
       utilVoltage = initVoltReading();
+      // if reading > 2.0 volts
       if (utilVoltage > 1.0)
       {
-        utilFlag = true;
-      } // end inner if
-    } // end outer if
+        // wait 1 second
+        delay(900);
+        // if reading still > 2.0 volts
+        utilVoltage = initVoltReading();
+        if (utilVoltage > 1.0)
+        {
+          utilFlag = true;
+        } // end inner if
+      } // end outer if
   } // end while loop
  
 }
