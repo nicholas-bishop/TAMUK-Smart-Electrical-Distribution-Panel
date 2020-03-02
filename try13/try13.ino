@@ -135,7 +135,7 @@ void loop()
     Current();
   }
 
-  RESET_FROM_NODE();
+  //RESET_FROM_NODE(); // maybe delete this?
 
 }
 
@@ -260,18 +260,6 @@ void Current() {
   if (nCurrentThruWire2 > 0.6)
   {
     currFlag = true; // latch
-    /*
-    strVar = "";
-    if (Serial.available())
-    {
-      strVar = Serial.readString();
-    }
-    if(strVar)
-    {
-      digitalWrite(load3, HIGH);
-      currFlag = false;
-    }
-    */
   }
 
   //***************************************************
