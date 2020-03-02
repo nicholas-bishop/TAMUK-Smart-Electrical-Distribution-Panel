@@ -19,7 +19,7 @@ const int sensor4 = A5;
 float nCurrentThruWire;
 float nCurrThruResistorPP;
 float nCurrThruResistorRMS;
-float nCurrentThruWire1;
+float nCurrentThruWire1; 
 float nCurrThruResistorPP1;
 float nCurrThruResistorRMS1;
 float nCurrentThruWire2;
@@ -211,7 +211,6 @@ void RESET_FROM_NODE()
       }
     }
 }
-
 
 
 void Current() {
