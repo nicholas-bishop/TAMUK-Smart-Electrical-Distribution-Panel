@@ -1,7 +1,7 @@
-//
+//  
 //  Description: code to control relay and monitor current transformers on arduino controller
 //  Authors: Jose Martinez, Nicholas Bishop
-//
+//  
 
 #define utilityrelay 2
 #define batteryrelay 7
@@ -50,7 +50,11 @@ float utilVoltage;
 
 // for timing delay interrupt
 unsigned long time_now = 0;
+unsigned long shed_time_now = 0;
+unsigned long shed_time_prev = 0;
+int shed_period = 2000;
 int period = 30000;
+bool SHED_TIMER_FLAG = false; // load shedding timer
 
 // for overcurrent stuff
 int RESET;
@@ -112,6 +116,7 @@ void loop()
       Current(); // !!!!!
       // wait conecutive 30 seconds for util to comeback
       time_now = millis(); // get the time right now
+      // *******  THIRTY SECOND WAIT  ********
       // keep waiting until 30 seconds have passed with consecutive utility voltage
       while (millis() < time_now + period)
       {
@@ -135,10 +140,7 @@ void loop()
     Current();
   }
 
-  //RESET_FROM_NODE(); // maybe delete this?
-
 }
-
 
 //**********************************************************************
 //   This function is just to get an initial utility voltage reading   *
@@ -147,7 +149,7 @@ void loop()
 
 float initVoltReading()
 {
-  float initVoltage; // temp value
+  float initVoltage; // temp value   
   int vReading = analogRead(pvi);
   initVoltage = (5. / 1023.) * vReading;
   return initVoltage;
@@ -161,18 +163,16 @@ void volts(void)
   int value = analogRead ( pvi);
   Volt = (5. / 1023.) * value;
 
-  // utility power loss, now going to battery backup
+  // utility power loss, now going to battery backup 
   if (Volt < 1.0) {
-
     digitalWrite(utilityrelay, LOW);
     digitalWrite(batteryrelay, HIGH);
     digitalWrite(load2, HIGH);
     digitalWrite(load4, HIGH);
-    //digitalWrite(load3, LOW);
-    //digitalWrite(load5, LOW);
     utilFlag = false;
-  }
-
+    // NEED to start TIMER FOR Shedding
+    SHED_TIMER_FLAG = true;
+  } 
 
   // utility power is back, return from battery
   if ( (Volt >= 1.0) && (!currFlag) ) 
@@ -182,7 +182,6 @@ void volts(void)
     digitalWrite(load2, HIGH);
     digitalWrite(load3, HIGH);
     digitalWrite(load4, HIGH);
-    //digitalWrite(load5, HIGH);
     utilFlag = true;
   }
   // This is the case where the current flag is raised
@@ -190,8 +189,8 @@ void volts(void)
   {
     digitalWrite(load3, LOW);
   }
-
- RESET_FROM_NODE();
+  
+  RESET_FROM_NODE(); // !! RESET from NODE Red  !!
   
 }
 
@@ -213,8 +212,6 @@ void RESET_FROM_NODE()
       }
     }
 }
-
-
 
 void Current() {
   nVPP = getVPP();
@@ -340,7 +337,7 @@ float getVPP1()
     // see if you have a new maxValue
     if (readValue1 > maxValue1)
     {
-      /*record the maximum sensor value*/
+      /*record the maximum sensor value*/ 
       maxValue1 = readValue1;
     }
   }
@@ -427,3 +424,20 @@ float getVPP4()
 
   return result4;
 }
+
+ShedTimer()
+{
+  // if SHED_Flag not true 
+    //  if current_time - previous time > SHED_period
+        // shut off load 
+  shed_time_now = millis();
+  if (SHED_TIMER_FLAG) 
+  {
+    if ( (shed_time_now - shed_time_prev) > shed_period)
+    {
+        pinMode
+        SHED_TIMER_FLAG = false
+    }
+  }
+
+} // Shedtimer
