@@ -1,8 +1,9 @@
 //  
 //  Description: code to control relay and monitor current transformers on arduino controller
-//  Authors: Jose Martinez, Nicholas Bishop
+//  Authors: Jose Martinez, Nicholas Bishop,
 //  
-
+#define THIRTY_MINUTES 30
+#define FIVE_MINUTES 5
 #define utilityrelay 2
 #define batteryrelay 7
 #define load2 3
@@ -50,9 +51,11 @@ float utilVoltage;
 
 // for timing delay interrupt
 unsigned long time_now = 0;
-unsigned long shed_time_now = 0;
-unsigned long shed_time_prev = 0;
-int shed_period = 2000;
+unsigned long shed_time_init = 0; // MIGHT not need this
+unsigned long shed_time_prev = 0; // prev
+unsigned long long shed_time_now = 0;
+unsigned long diff = 0;
+unsigned long shed_period = 1800000;
 int period = 30000;
 bool SHED_TIMER_FLAG = false; // load shedding timer
 
@@ -62,6 +65,9 @@ String strVar;
 
 // Overcurrent flag, can only be reset on PI !!
 boolean currFlag = false; 
+
+// SHEDDING COUNTER TEST
+int shed_counter = 0;
 
 
 
@@ -103,13 +109,15 @@ void setup() {
 
 void loop()
 {
-
-  // while utility power is lost
+  //********************************
+  // while utility power is LOST   *
+  //********************************
   while (!utilFlag)
   {
     Current(); // !!!
     // get analog voltage reading
     utilVoltage = initVoltReading(); // reusing same init voltage function
+     
     // if voltage is greater than 1 volt
     if (utilVoltage > 1.0)
     {
@@ -123,15 +131,38 @@ void loop()
         // if voltage is seen (<1v) reset timer to 30 seconds
         if (initVoltReading() < 1.0)
         {
-          time_now = millis(); // grab the n
+          time_now = millis(); 
         }
         Current(); // ********* THIS WAS ADDED HERE FROM BOTTOM IF STATEMENT
       }
       // if AFTER 30 consecutive seconds, reading still greater than 1 volt
       utilFlag = true;
     }
+
+    if (SHED_TIMER_FLAG) 
+    { 
+      shed_time_now = millis();
+      diff = shed_time_now - shed_time_prev;
+      if (diff >= 60000)
+      {
+        ++shed_counter;
+        diff = 0;
+        shed_time_prev = shed_time_now;
+      }
+      if (shed_counter >= FIVE_MINUTES)
+      {
+        digitalWrite(utilityrelay, LOW);
+        digitalWrite(batteryrelay, HIGH);
+        digitalWrite(load2, LOW);
+        digitalWrite(load3, HIGH);
+        digitalWrite(load4, HIGH);
+        SHED_TIMER_FLAG = false; 
+      }
+    }
+    
   }
 
+  
   // ORIGINAL function calls
   // normal operation
   if (utilFlag)
@@ -166,19 +197,23 @@ void volts(void)
   // utility power loss, now going to battery backup 
   if (Volt < 1.0) {
     digitalWrite(utilityrelay, LOW);
+    delay(10);
     digitalWrite(batteryrelay, HIGH);
     digitalWrite(load2, HIGH);
+    digitalWrite(load3, HIGH);
     digitalWrite(load4, HIGH);
     utilFlag = false;
     // NEED to start TIMER FOR Shedding
     SHED_TIMER_FLAG = true;
+    //shed_time_init = millis(); // get current time to start !!!! NEEDs to stay here
   } 
 
   // utility power is back, return from battery
   if ( (Volt >= 1.0) && (!currFlag) ) 
   {
-    digitalWrite(utilityrelay, HIGH);
     digitalWrite(batteryrelay, LOW);
+    delay(10);
+    digitalWrite(utilityrelay, HIGH);
     digitalWrite(load2, HIGH);
     digitalWrite(load3, HIGH);
     digitalWrite(load4, HIGH);
@@ -424,20 +459,3 @@ float getVPP4()
 
   return result4;
 }
-
-ShedTimer()
-{
-  // if SHED_Flag not true 
-    //  if current_time - previous time > SHED_period
-        // shut off load 
-  shed_time_now = millis();
-  if (SHED_TIMER_FLAG) 
-  {
-    if ( (shed_time_now - shed_time_prev) > shed_period)
-    {
-        pinMode
-        SHED_TIMER_FLAG = false
-    }
-  }
-
-} // Shedtimer
