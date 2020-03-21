@@ -1,8 +1,18 @@
 //
 //  Description: code to control relay and monitor current transformers on arduino controller
 //  Authors: Jose Martinez, Nicholas Bishop
+<<<<<<< Updated upstream
 //
 
+=======
+//  
+#define ONE_HOUR 60
+#define THIRTY_MINUTES 30
+#define TEN_MINUTES 10  // for testing 
+#define FIVE_MINUTES 5  // for testing 
+#define FOUR_MINUTES 4  // for testing 
+#define TWO_MINUTES 2   // for testing 
+>>>>>>> Stashed changes
 #define utilityrelay 2
 #define batteryrelay 7
 #define load2 3
@@ -59,9 +69,18 @@ String strVar;
 // Overcurrent flag, can only be reset on PI !!
 boolean currFlag = false; 
 
+<<<<<<< Updated upstream
+=======
+// SHEDDING COUNTER TEST
+int shed_counter = 0;
 
+//************************************
+//  END of Variable declarations     *
+//************************************
+>>>>>>> Stashed changes
 
-void setup() {
+void setup() 
+{
   Serial.begin(115200);
   pinMode(utilityrelay, OUTPUT);   //SSR switching on off pin
   pinMode(batteryrelay, OUTPUT);   //SSR switching on off pin
@@ -125,6 +144,40 @@ void loop()
       // if AFTER 30 consecutive seconds, reading still greater than 1 volt
       utilFlag = true;
     }
+<<<<<<< Updated upstream
+=======
+
+    if (SHED_TIMER_FLAG) 
+    { 
+      shed_time_now = millis();
+      diff = shed_time_now - shed_time_prev;
+      if (diff >= 60000)
+      {
+        ++shed_counter;
+        diff = 0;
+        shed_time_prev = shed_time_now;
+      }
+      if (shed_counter >= THIRTY_MINUTES)
+      {
+        digitalWrite(utilityrelay, LOW);
+        digitalWrite(batteryrelay, HIGH);
+        digitalWrite(load2, LOW);
+        digitalWrite(load3, HIGH);
+        digitalWrite(load4, HIGH); 
+      }
+      // after 1 hour, shut off load 3..
+      if (shed_counter >= ONE_HOUR)
+      {
+        digitalWrite(utilityrelay, LOW);
+        digitalWrite(batteryrelay, HIGH);
+        digitalWrite(load2, LOW);
+        digitalWrite(load3, LOW); // this is now off 
+        digitalWrite(load4, HIGH);
+        SHED_TIMER_FLAG = false; 
+      }
+    }
+    
+>>>>>>> Stashed changes
   }
 
   // ORIGINAL function calls
